@@ -1,22 +1,29 @@
-const express = require("express");
+
+const express = require('express');
+const cors = require('cors');
 const app = express();
-const path = require("path");
-require("dotenv").config();
+const port = process.env.PORT || 10000;
 
-const PORT = process.env.PORT || 3000;
+app.use(cors());
 
-app.use(express.static(path.join(__dirname, "public")));
+app.get('/apps/free-gift/config', (req, res) => {
+  const variantId = req.query.variant_id || process.env.GIFT_VARIANT_ID;
+  const threshold = parseInt(process.env.THRESHOLD_CENTS || '5000');
 
-app.get("/apps/free-gift/config", (req, res) => {
-  res.json({
-    threshold: parseInt(process.env.THRESHOLD_CENTS),
-    giftVariantId: process.env.GIFT_VARIANT_ID,
-    claimText: process.env.CLAIM_TEXT,
-    goalText: process.env.GOAL_TEXT,
-    reachedText: process.env.REACHED_TEXT,
-  });
+  const response = {
+    threshold,
+    gift_variant_id: variantId,
+    texts: {
+      goal: process.env.GOAL_TEXT || '',
+      reached: process.env.REACHED_TEXT || '',
+      claim: process.env.CLAIM_TEXT || ''
+    }
+  };
+
+  res.setHeader('Content-Type', 'application/json');
+  res.send(JSON.stringify(response));
 });
 
-app.listen(PORT, () => {
-  console.log(`Free Gift app listening on port ${PORT}`);
+app.listen(port, () => {
+  console.log(`Free Gift App running on port ${port}`);
 });
